@@ -1,29 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JARVIS FIXED</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JARVIS - AQ FIXED</title>
+<style>
+body{background:#020617;color:#00e5ff;font-family:monospace;text-align:center;padding:20px}
+#box{border:1px solid #00e5ff;padding:15px;border-radius:10px;max-width:400px;margin:20px auto;min-height:100px;text-align:left;word-break:break-all}
+input{padding:10px;width:60%;border-radius:10px;border:1px solid #00e5ff;background:#000;color:#fff}
+button{padding:10px 15px;border-radius:10px;background:#00e5ff;font-weight:bold;border:none}
+</style>
 </head>
-<body style="background:#02111f;color:#0ff;font-family:monospace;padding:20px;text-align:center">
-<h3>JARVIS FIXED TEST</h3>
-<div id="out" style="border:1px solid #0ff;padding:15px;border-radius:10px;min-height:100px;text-align:left"></div>
-<br><input id="inp" style="width:70%;padding:10px"><button onclick="go()" style="padding:10px">SEND</button>
+<body>
+<h3>JARVIS ONLINE - AQ KEY</h3>
+<div id="box">Ready... AQ key se test karenge</div>
+<br>
+<input id="q" placeholder="Hi jarvis"><button onclick="go()">SEND</button>
 <script>
-const API_KEY = "AQ.Ab8RN6I-fAIPB-mr1RVwp4xV1cB0QYQp_xxx_TUMHARI_PURI_KEY_YAHAN_PASTE_KARO";
+// TERI AQ... WALI KEY YAHAN
+const API_KEY = "AQ.Ab8RN6I-fAIPB-mr1RVwp4xV1cB0QYQp_Abc...PURI_KEY";
+
 async function go(){
-  const q = document.getElementById('inp').value;
-  const out = document.getElementById('out');
-  out.innerHTML = "Thinking...";
-  const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
-  const res = await fetch(url, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({contents:[{parts:[{text:q}]}]})
-  });
-  const data = await res.json();
-  console.log(data);
-  if(data.error){ out.innerHTML = "ERROR: " + data.error.message; }
-  else { out.innerHTML = data.candidates[0].content.parts[0].text; }
+  const text = document.getElementById('q').value;
+  const box = document.getElementById('box');
+  box.innerHTML = "Thinking...";
+  try{
+    // AQ KEY KE LIYE SAHI URL AUR HEADER
+    const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+    const res = await fetch(url,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "x-goog-api-key": API_KEY
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: text }] }]
+      })
+    });
+    const data = await res.json();
+    console.log(data);
+    if(data.error){
+      box.innerHTML = "ERROR: " + data.error.message + "<br><br>Status: " + data.error.status;
+    } else {
+      box.innerHTML = data.candidates[0].content.parts[0].text;
+    }
+  }catch(e){
+    box.innerHTML = "NETWORK ERROR: " + e.message;
+  }
 }
 </script>
 </body>
