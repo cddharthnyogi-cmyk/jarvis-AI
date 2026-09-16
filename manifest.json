@@ -1,0 +1,17 @@
+{
+  "name": "J.A.R.V.I.S. Advanced AI",
+  "short_name": "JARVIS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020813",
+  "theme_color": "#020813",
+  "description": "Tony Stark's J.A.R.V.I.S. AI Assistant powered by Gemini.",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
