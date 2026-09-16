@@ -1,106 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="manifest" href="manifest.json">
-    <title>J.A.R.V.I.S. Advanced AI</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #020813; color: #00f0ff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px; text-align: center; }
-        
-        .header h1 { font-size: 26px; letter-spacing: 5px; text-shadow: 0 0 15px #00f0ff; margin-top: 5px; }
-        .status { font-size: 11px; color: #00ffaa; margin-top: 5px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; }
-
-        .orb-container { position: relative; width: 170px; height: 170px; display: flex; justify-content: center; align-items: center; margin: 15px 0; }
-        .outer-ring { position: absolute; width: 100%; height: 100%; border: 3px dashed #00f0ff; border-radius: 50%; animation: rotate 12s linear infinite; box-shadow: 0 0 25px rgba(0, 240, 255, 0.4); }
-        .inner-core { width: 90px; height: 90px; background: radial-gradient(circle, #00f0ff 0%, #003355 70%, transparent 100%); border-radius: 50%; box-shadow: 0 0 35px #00f0ff; animation: pulse 2s infinite alternate; }
-        
-        @keyframes rotate { 100% { transform: rotate(360deg); } }
-        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 20px #00f0ff; } 100% { transform: scale(1.05); box-shadow: 0 0 45px #00f0ff; } }
-
-        .response-box { width: 100%; max-width: 360px; height: 130px; background: rgba(0, 15, 30, 0.85); border: 1px solid #00f0ff; border-radius: 12px; padding: 12px; overflow-y: auto; color: #e0ffff; font-size: 13px; text-align: left; box-shadow: inset 0 0 12px rgba(0,240,255,0.25); }
-
-        .controls { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-        .text-input { background: rgba(0,0,0,0.7); border: 1px solid #004466; color: #00f0ff; padding: 11px; border-radius: 8px; font-size: 13px; outline: none; }
-        .text-input::placeholder { color: #005577; }
-        
-        .btn-group { display: flex; gap: 6px; }
-        .action-btn { flex: 1; background: #00f0ff; color: #020813; border: none; padding: 12px 8px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 0 12px #00f0ff; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; }
-        .action-btn:active { transform: scale(0.96); }
-        .wake-btn { background: #ffaa00; box-shadow: 0 0 12px #ffaa00; color: #020813; }
-    </style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JARVIS AI</title>
+<style>
+body{background:#020617;color:white;font-family:Arial;text-align:center;margin:0;padding:20px}
+#orb{width:120px;height:120px;background:radial-gradient(#38bdf8,#0ea5e9);border-radius:50%;margin:40px auto;box-shadow:0 0 40px #38bdf8;animation:pulse 2s infinite}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+#chat{max-width:400px;margin:auto;text-align:left;background:#0f172a;padding:15px;border-radius:12px;min-height:200px;max-height:50vh;overflow-y:auto}
+input{width:70%;padding:12px;border-radius:20px;border:none;outline:none}
+button{padding:12px 18px;border-radius:20px;border:none;background:#38bdf8;color:black;font-weight:bold}
+.key-box{margin:15px auto;font-size:12px;opacity:0.7}
+</style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>J.A.R.V.I.S.</h1>
-        <div class="status" id="status">SYSTEM STANDBY</div>
-    </div>
+<div id="orb"></div>
+<h2>JARVIS is Online</h2>
 
-    <div class="orb-container">
-        <div class="outer-ring"></div>
-        <div class="inner-core" id="orb"></div>
-    </div>
+<div id="chat"></div>
 
-    <div class="response-box" id="responseBox">
-        Sir, systems online. Click 'Hands-Free Mode' to enable wake word or type a command.
-    </div>
+<br>
+<input id="prompt" placeholder="Ask anything...">
+<button onclick="ask()">Send</button>
+<button onclick="startVoice()">🎤 Speak</button>
 
-    <div class="controls">
-        <input type="text" id="userText" class="text-input" placeholder="Type command...">
-        <div class="btn-group">
-            <button class="action-btn wake-btn" onclick="toggleWakeWord()">🎙️ Hands-Free</button>
-            <button class="action-btn" onclick="processCommand()">Send / Speak</button>
-        </div>
-    </div>
+<div class="key-box">
+<p id="keyStatus"></p>
+<button onclick="changeKey()" style="font-size:10px;padding:5px">Change API Key</button>
+</div>
 
-    <script>
-        const responseBox = document.getElementById('responseBox');
-        const statusText = document.getElementById('status');
-        const userTextInput = document.getElementById('userText');
-        const apiKey = "AQ.Ab8RN6I3Rkq4JJHTxYbnobzOclPH_HowHxtBNU5jGRjrQcwbNA"; // API Key
+<script>
+// --- KEY SYSTEM ---
+let apiKey = localStorage.getItem("jarvis_key");
+if(!apiKey){
+  apiKey = prompt("Apni AQ... wali Gemini API Key daalo:");
+  if(apiKey) localStorage.setItem("jarvis_key", apiKey);
+}
+document.getElementById("keyStatus").innerText = apiKey? "Key Saved: " + apiKey.slice(0,8) + "..." : "No Key";
 
-        let recognition = null;
-        let isHandsFreeActive = false;
+function changeKey(){
+  let k = prompt("Nayi API Key daalo:", apiKey || "");
+  if(k){ localStorage.setItem("jarvis_key", k); location.reload(); }
+}
 
-        // Initialize Speech Recognition
-        function initRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("Speech recognition not supported in this browser. Use Chrome.");
-                return null;
-            }
-            const rec = new SpeechRecognition();
-            rec.continuous = true;
-            rec.interimResults = false;
-            rec.lang = 'en-US';
-            return rec;
-        }
+// --- CHAT ---
+async function ask(){
+  const input = document.getElementById("prompt");
+  const text = input.value;
+  if(!text) return;
+  addMsg("You: " + text);
+  input.value = "";
 
-        // Toggle Hands-Free Wake Word Mode
-        function toggleWakeWord() {
-            if (isHandsFreeActive) {
-                if (recognition) recognition.stop();
-                isHandsFreeActive = false;
-                statusText.innerText = "SYSTEM STANDBY";
-                responseBox.innerText = "Hands-Free mode deactivated.";
-                return;
-            }
+  const reply = await callGemini(text);
+  addMsg("JARVIS: " + reply);
+  speak(reply);
+}
 
-            recognition = initRecognition();
-            if (!recognition) return;
+function addMsg(m){
+  const c = document.getElementById("chat");
+  c.innerHTML += "<p>"+m+"</p>";
+  c.scrollTop = c.scrollHeight;
+}
 
-            recognition.onstart = () => {
-                isHandsFreeActive = true;
-                statusText.innerText = "LISTENING FOR 'JARVIS'...";
-                responseBox.innerText = "Hands-Free active. Say 'Hey Jarvis' followed by your command.";
-                speakOut("Hands-free mode activated, sir.");
-            };
+// --- MAIN GEMINI CALL - FIXED FOR AQ KEY ---
+async function callGemini(prompt){
+  apiKey = localStorage.getItem("jarvis_key");
+  if(!apiKey) return "API Key nahi hai! Change API Key pe click karo.";
 
-            recognition.onresult = (event) => {
-                const speechResult = event.results[event.results.length - 1][0].transcript.toLowerCase();
-                console.log("Heard:", speechResult);
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
+    });
+
+    const data = await res.json();
+    console.log(data);
+
+    if(data.error){
+      return "Error: " + data.error.message + " (Key check karo)";
+    }
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "No reply";
+
+  } catch(e){
+    return "Network Error: " + e.message;
+  }
+}
+
+// --- VOICE ---
+function speak(text){
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US";
+  speechSynthesis.speak(u);
+}
+
+function startVoice(){
+  const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  rec.lang = "en-US";
+  rec.start();
+  rec.onresult = (e) => {
+    document.getElementById("prompt").value = e.results[0][0].transcript;
+    ask();
+  }
+}
+</script>
+
+</body>
+</html>                console.log("Heard:", speechResult);
 
                 if (speechResult.includes('jarvis')) {
                     statusText.innerText = "JARVIS AWAKE...";
