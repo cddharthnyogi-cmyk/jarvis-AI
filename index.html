@@ -3,50 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JARVIS - AQ FIXED</title>
+<title>JARVIS v3.6</title>
 <style>
-body{background:#020617;color:#00e5ff;font-family:monospace;text-align:center;padding:20px}
-#box{border:1px solid #00e5ff;padding:15px;border-radius:10px;max-width:400px;margin:20px auto;min-height:100px;text-align:left;word-break:break-all}
-input{padding:10px;width:60%;border-radius:10px;border:1px solid #00e5ff;background:#000;color:#fff}
-button{padding:10px 15px;border-radius:10px;background:#00e5ff;font-weight:bold;border:none}
+body{background:#000;color:#00e5ff;font-family:monospace;text-align:center;padding:20px}
+#orb{width:120px;height:120px;background:radial-gradient(#00e5ff,#003);border-radius:50%;margin:20px auto;box-shadow:0 0 30px #00e5ff}
+#box{border:1px solid #00e5ff;padding:15px;border-radius:12px;max-width:450px;margin:auto;min-height:80px;text-align:left}
+input{width:65%;padding:10px;background:#111;border:1px solid #00e5ff;color:#fff;border-radius:8px}
+button{padding:10px 15px;background:#00e5ff;border:none;border-radius:8px;font-weight:bold}
+small{opacity:0.5}
 </style>
 </head>
 <body>
-<h3>JARVIS ONLINE - AQ KEY</h3>
-<div id="box">Ready... AQ key se test karenge</div>
+<small>JARVIS v3.6 | ONLINE</small>
+<div id="orb"></div>
+<h3>JARVIS v3.6</h3>
+<div id="box">Hello, I am JARVIS v3.6 Ready...</div>
 <br>
-<input id="q" placeholder="Hi jarvis"><button onclick="go()">SEND</button>
+<input id="q" placeholder="Ask JARVIS 3.6..."><button onclick="go()">SEND</button>
+
 <script>
-// TERI AQ... WALI KEY YAHAN
-const API_KEY = "AQ.Ab8RN6I-fAIPB-mr1RVwp4xV1cB0QYQp_Abc...PURI_KEY";
+const API_KEY = "AQ.Ab8RN6I-TERI_PURI_KEY_PASTE_KARO";
+const MODEL = "gemini-3.6-flash"; // andar se latest chalega
 
 async function go(){
-  const text = document.getElementById('q').value;
-  const box = document.getElementById('box');
-  box.innerHTML = "Thinking...";
-  try{
-    // AQ KEY KE LIYE SAHI URL AUR HEADER
-    const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-    const res = await fetch(url,{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "x-goog-api-key": API_KEY
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: text }] }]
-      })
-    });
-    const data = await res.json();
-    console.log(data);
-    if(data.error){
-      box.innerHTML = "ERROR: " + data.error.message + "<br><br>Status: " + data.error.status;
-    } else {
-      box.innerHTML = data.candidates[0].content.parts[0].text;
-    }
-  }catch(e){
-    box.innerHTML = "NETWORK ERROR: " + e.message;
-  }
+  const t = document.getElementById('q').value;
+  const b = document.getElementById('box');
+  if(!t) return;
+  b.innerHTML += `<br><br><b>You:</b> ${t}`;
+  b.innerHTML += `<br><i>Thinking...</i>`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+  const r = await fetch(url,{
+    method:"POST",
+    headers:{"Content-Type":"application/json","x-goog-api-key":API_KEY},
+    body:JSON.stringify({contents:[{parts:[{text:t}]}]})
+  });
+  const d = await r.json();
+  if(d.error){ b.innerHTML += `<br><br><b style="color:red">Error:</b> ${d.error.message}`; }
+  else{ b.innerHTML += `<br><br><b>JARVIS 3.6:</b> ${d.candidates[0].content.parts[0].text}`; }
+  document.getElementById('q').value="";
 }
 </script>
 </body>
