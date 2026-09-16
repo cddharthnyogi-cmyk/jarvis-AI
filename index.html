@@ -1,97 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JARVIS</title>
-<style>
-body{background:#020a14;color:#00e5ff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:space-between;height:100vh;margin:0;padding:20px;box-sizing:border-box}
-.orb-wrap{margin-top:60px;position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center}
-.orb{width:110px;height:110px;background:radial-gradient(circle at 30% 30%, #00e5ff, #004d5c);border-radius:50%;box-shadow:0 0 40px #00e5ff}
-.ring{position:absolute;width:200px;height:200px;border:3px dashed #00e5ff;border-radius:50%;animation:spin 8s linear infinite;opacity:0.7}
-@keyframes spin{to{transform:rotate(360deg)}}
-#log{width:90%;max-width:400px;background:rgba(0,229,255,0.07);border:1px solid #00e5ff;border-radius:15px;padding:15px;min-height:80px;text-align:left;font-size:14px;word-wrap:break-word}
-#inputArea{width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px}
-#prompt{width:100%;background:#0a1929;border:1px solid #00e5ff;border-radius:12px;padding:14px;color:white;outline:none;box-sizing:border-box}
-.btns{display:flex;gap:10px}
-.btns button{flex:1;padding:14px;border:none;border-radius:25px;font-weight:bold;letter-spacing:1px}
-#handsfree{background:#ff9f00;box-shadow:0 0 15px #ff9f00}
-#send{background:#00e5ff;box-shadow:0 0 15px #00e5ff}
-#error{color:#ff4d4d}
-</style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JARVIS FIXED</title>
 </head>
-<body>
-
-<div style="color:#00ff88;letter-spacing:4px;font-size:12px">JARVIS ONLINE</div>
-
-<div class="orb-wrap">
-<div class="ring"></div>
-<div class="orb" id="orb"></div>
-</div>
-
-<div id="log">Hello! I am JARVIS. Your `AQ...` key fix is applied.</div>
-
-<div id="inputArea">
-<input id="prompt" placeholder="Hello jarves" onkeydown="if(event.key==='Enter') send()">
-<div class="btns">
-<button id="handsfree" onclick="handsfree()">🎙️ HANDS-FREE</button>
-<button id="send" onclick="send()">SEND / SPEAK</button>
-</div>
-</div>
-
+<body style="background:#02111f;color:#0ff;font-family:monospace;padding:20px;text-align:center">
+<h3>JARVIS FIXED TEST</h3>
+<div id="out" style="border:1px solid #0ff;padding:15px;border-radius:10px;min-height:100px;text-align:left"></div>
+<br><input id="inp" style="width:70%;padding:10px"><button onclick="go()" style="padding:10px">SEND</button>
 <script>
-//!!! APNI PURI AQ... KEY YAHAN DAL!!!
-const API_KEY = "AQ.Ab8RN6J2_..._YAHAN_APNI_PURI_KEY_DALO";
-
-async function send() {
-  const input = document.getElementById('prompt');
-  const text = input.value.trim();
-  if(!text) return;
-  const log = document.getElementById('log');
-  log.innerHTML = "You: " + text + "<br><br>JARVIS is thinking...";
-  input.value = "";
-
-  try {
-    // Sahi tarika - key ko URL me?key= se bhejna, header me nahi
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: text }] }]
-      })
-    });
-
-    const data = await response.json();
-    console.log(data);
-
-    if(data.error){
-      log.innerHTML = `<span id='error'>API Error: ${data.error.message}</span>`;
-      return;
-    }
-
-    const reply = data.candidates[0].content.parts[0].text;
-    log.innerHTML = "JARVIS: " + reply;
-    speak(reply);
-
-  } catch(e){
-    log.innerHTML = "Network Error: " + e.message;
-  }
-}
-
-function speak(t){
-  const ut = new SpeechSynthesisUtterance(t);
-  speechSynthesis.speak(ut);
-}
-
-function handsfree(){
-  const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-  rec.start();
-  rec.onresult = (e) => {
-    document.getElementById('prompt').value = e.results[0][0].transcript;
-    send();
-  }
+const API_KEY = "AQ.Ab8RN6I-fAIPB-mr1RVwp4xV1cB0QYQp_xxx_TUMHARI_PURI_KEY_YAHAN_PASTE_KARO";
+async function go(){
+  const q = document.getElementById('inp').value;
+  const out = document.getElementById('out');
+  out.innerHTML = "Thinking...";
+  const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
+  const res = await fetch(url, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({contents:[{parts:[{text:q}]}]})
+  });
+  const data = await res.json();
+  console.log(data);
+  if(data.error){ out.innerHTML = "ERROR: " + data.error.message; }
+  else { out.innerHTML = data.candidates[0].content.parts[0].text; }
 }
 </script>
 </body>
