@@ -1,114 +1,98 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JARVIS AI</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS</title>
 <style>
-body{background:#020617;color:white;font-family:Arial;text-align:center;margin:0;padding:20px}
-#orb{width:120px;height:120px;background:radial-gradient(#38bdf8,#0ea5e9);border-radius:50%;margin:40px auto;box-shadow:0 0 40px #38bdf8;animation:pulse 2s infinite}
-@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
-#chat{max-width:400px;margin:auto;text-align:left;background:#0f172a;padding:15px;border-radius:12px;min-height:200px;max-height:50vh;overflow-y:auto}
-input{width:70%;padding:12px;border-radius:20px;border:none;outline:none}
-button{padding:12px 18px;border-radius:20px;border:none;background:#38bdf8;color:black;font-weight:bold}
-.key-box{margin:15px auto;font-size:12px;opacity:0.7}
+body{background:#020a14;color:#00e5ff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:space-between;height:100vh;margin:0;padding:20px;box-sizing:border-box}
+.orb-wrap{margin-top:60px;position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center}
+.orb{width:110px;height:110px;background:radial-gradient(circle at 30% 30%, #00e5ff, #004d5c);border-radius:50%;box-shadow:0 0 40px #00e5ff}
+.ring{position:absolute;width:200px;height:200px;border:3px dashed #00e5ff;border-radius:50%;animation:spin 8s linear infinite;opacity:0.7}
+@keyframes spin{to{transform:rotate(360deg)}}
+#log{width:90%;max-width:400px;background:rgba(0,229,255,0.07);border:1px solid #00e5ff;border-radius:15px;padding:15px;min-height:80px;text-align:left;font-size:14px;word-wrap:break-word}
+#inputArea{width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px}
+#prompt{width:100%;background:#0a1929;border:1px solid #00e5ff;border-radius:12px;padding:14px;color:white;outline:none;box-sizing:border-box}
+.btns{display:flex;gap:10px}
+.btns button{flex:1;padding:14px;border:none;border-radius:25px;font-weight:bold;letter-spacing:1px}
+#handsfree{background:#ff9f00;box-shadow:0 0 15px #ff9f00}
+#send{background:#00e5ff;box-shadow:0 0 15px #00e5ff}
+#error{color:#ff4d4d}
 </style>
 </head>
 <body>
 
-<div id="orb"></div>
-<h2>JARVIS is Online</h2>
+<div style="color:#00ff88;letter-spacing:4px;font-size:12px">JARVIS ONLINE</div>
 
-<div id="chat"></div>
+<div class="orb-wrap">
+<div class="ring"></div>
+<div class="orb" id="orb"></div>
+</div>
 
-<br>
-<input id="prompt" placeholder="Ask anything...">
-<button onclick="ask()">Send</button>
-<button onclick="startVoice()">🎤 Speak</button>
+<div id="log">Hello! I am JARVIS. Your `AQ...` key fix is applied.</div>
 
-<div class="key-box">
-<p id="keyStatus"></p>
-<button onclick="changeKey()" style="font-size:10px;padding:5px">Change API Key</button>
+<div id="inputArea">
+<input id="prompt" placeholder="Hello jarves" onkeydown="if(event.key==='Enter') send()">
+<div class="btns">
+<button id="handsfree" onclick="handsfree()">🎙️ HANDS-FREE</button>
+<button id="send" onclick="send()">SEND / SPEAK</button>
+</div>
 </div>
 
 <script>
-// --- KEY SYSTEM ---
-let apiKey = localStorage.getItem("jarvis_key");
-if(!apiKey){
-  apiKey = prompt("Apni AQ... wali Gemini API Key daalo:");
-  if(apiKey) localStorage.setItem("jarvis_key", apiKey);
-}
-document.getElementById("keyStatus").innerText = apiKey? "Key Saved: " + apiKey.slice(0,8) + "..." : "No Key";
+//!!! APNI PURI AQ... KEY YAHAN DAL!!!
+const API_KEY = "AQ.Ab8RN6J2_..._YAHAN_APNI_PURI_KEY_DALO";
 
-function changeKey(){
-  let k = prompt("Nayi API Key daalo:", apiKey || "");
-  if(k){ localStorage.setItem("jarvis_key", k); location.reload(); }
-}
-
-// --- CHAT ---
-async function ask(){
-  const input = document.getElementById("prompt");
-  const text = input.value;
+async function send() {
+  const input = document.getElementById('prompt');
+  const text = input.value.trim();
   if(!text) return;
-  addMsg("You: " + text);
+  const log = document.getElementById('log');
+  log.innerHTML = "You: " + text + "<br><br>JARVIS is thinking...";
   input.value = "";
 
-  const reply = await callGemini(text);
-  addMsg("JARVIS: " + reply);
-  speak(reply);
-}
-
-function addMsg(m){
-  const c = document.getElementById("chat");
-  c.innerHTML += "<p>"+m+"</p>";
-  c.scrollTop = c.scrollHeight;
-}
-
-// --- MAIN GEMINI CALL - FIXED FOR AQ KEY ---
-async function callGemini(prompt){
-  apiKey = localStorage.getItem("jarvis_key");
-  if(!apiKey) return "API Key nahi hai! Change API Key pe click karo.";
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
   try {
-    const res = await fetch(url, {
+    // Sahi tarika - key ko URL me?key= se bhejna, header me nahi
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
+        contents: [{ parts: [{ text: text }] }]
       })
     });
 
-    const data = await res.json();
+    const data = await response.json();
     console.log(data);
 
     if(data.error){
-      return "Error: " + data.error.message + " (Key check karo)";
+      log.innerHTML = `<span id='error'>API Error: ${data.error.message}</span>`;
+      return;
     }
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || "No reply";
+
+    const reply = data.candidates[0].content.parts[0].text;
+    log.innerHTML = "JARVIS: " + reply;
+    speak(reply);
 
   } catch(e){
-    return "Network Error: " + e.message;
+    log.innerHTML = "Network Error: " + e.message;
   }
 }
 
-// --- VOICE ---
-function speak(text){
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "en-US";
-  speechSynthesis.speak(u);
+function speak(t){
+  const ut = new SpeechSynthesisUtterance(t);
+  speechSynthesis.speak(ut);
 }
 
-function startVoice(){
+function handsfree(){
   const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-  rec.lang = "en-US";
   rec.start();
   rec.onresult = (e) => {
-    document.getElementById("prompt").value = e.results[0][0].transcript;
-    ask();
+    document.getElementById('prompt').value = e.results[0][0].transcript;
+    send();
   }
 }
 </script>
-
 </body>
 </html>
